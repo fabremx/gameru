@@ -2477,6 +2477,11 @@ path@^0.12.7:
     process "^0.11.1"
     util "^0.10.3"
 
+phaser-matter-collision-plugin@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/phaser-matter-collision-plugin/-/phaser-matter-collision-plugin-1.0.0.tgz#de6da670662b1d507857db02d0961356c5037e74"
+  integrity sha512-8ihbK5tPmMzpLSbJkrnyPKNZT/TyhN2bjHtthTl2cmTCiJpY6Ih7SZf1Kb6zWtUD8kWlllPrBktF1CcwmMvc0w==
+
 phaser@3.52.0:
   version "3.52.0"
   resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.52.0.tgz#834dd7a7717308c2576d2450d0806317cf3d1ea8"

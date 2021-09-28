@@ -3,8 +3,14 @@
     "target": "ES6",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "noImplicitAny": true
+    "noImplicitAny": true,
   },
+  "typeRoots": [
+    "./node_modules/phaser/types"
+  ],
+  "types": [
+    "Phaser"
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
