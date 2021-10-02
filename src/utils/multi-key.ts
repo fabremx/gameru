@@ -9,6 +9,10 @@ export default class MultiKey {
         this.keys = keys.map((key: number) => scene.input.keyboard.addKey(key));
     }
 
+    justDown() {
+        return this.keys.some((key: Phaser.Input.Keyboard.Key) => Phaser.Input.Keyboard.JustDown(key));
+    }
+
     isDown() {
         return this.keys.some((key: Phaser.Input.Keyboard.Key) => key.isDown);
     }

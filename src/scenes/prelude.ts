@@ -7,7 +7,6 @@ import Map from "../objects/map";
 export default class PreludeScene extends Phaser.Scene {
   private player: Player;
   private developer: Character;
-  private gabro: Character;
 
   private sceneTitle: SceneTitle;
   private camera: Camera;
@@ -34,11 +33,26 @@ export default class PreludeScene extends Phaser.Scene {
 
     this.player = new Player({
       scene: this,
-      x: this.scale.width - 400,
+      x: this.scale.width - 100,
       y: 700,
       sprite: {
         path: "assets/sprites/player.png",
-        size: 32,
+        width: 32,
+        height: 32,
+        margin: 1,
+        spacing: 2,
+      }
+    });
+
+    this.developer = new Character({
+      scene: this,
+      x: this.scale.width + 650,
+      y: 970,
+      name: "alien",
+      sprite: {
+        path: "assets/sprites/alien.png",
+        width: 66,
+        height: 92,
         margin: 1,
         spacing: 2,
       }
@@ -61,11 +75,14 @@ export default class PreludeScene extends Phaser.Scene {
     this.background2 = this.add.image(this.scale.width - 200, this.scale.height - 300, 'background2');
     this.background3 = this.add.image(this.scale.width - 200, this.scale.height - 200, 'background3');
 
+    var noCollisionGroup = this.matter.world.nextGroup(true);
+
     this.sceneTitle.add();
     this.player.add();
+    this.developer.add();
 
-    // const spawn = map.findObject("Spawn", (obj) => obj.name === "Spawn Point");
-    // console.log('Spawn', spawn)
+    this.player.collideWith(noCollisionGroup);
+    this.developer.collideWith(noCollisionGroup);
 
     // Camera
     this.camera.add(this.map.size().width, this.map.size().height);
@@ -74,6 +91,8 @@ export default class PreludeScene extends Phaser.Scene {
 
   update() {
     this.player.handleInputs();
+    this.player.handleOverlapWith([this.developer]);
+    this.player.handleDialogWith([this.developer])
 
     this.background.x -= 0.05;
     this.background2.x -= 0.15;

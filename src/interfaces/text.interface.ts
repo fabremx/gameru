@@ -7,8 +7,5 @@ export interface ISceneTitleConstructor {
 
 export interface IDialogConstructor {
     scene: Phaser.Scene;
-    x: number;
-    y: number;
-    characterName: string;
     dialogs: string[];
 }
