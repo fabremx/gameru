@@ -104,8 +104,12 @@ export default class Player {
     }
 
     private startDialog() {
-        this.canMove = false;
+        if (!this.overlappedCharacter.isSpeakableCharacter) {
+            return
+        }
+
         const characterDialogs = this.overlappedCharacter.getDialogs()
+        this.canMove = false;
         this.dialogBox = new DialogBox({
             scene: this.scene, dialogs: characterDialogs
         })
@@ -116,6 +120,7 @@ export default class Player {
     private endDialog() {
         this.canMove = true;
         this.activeDialog = false
+        this.overlappedCharacter.prepareNextDialog()
     }
 
     handleDialogs(): void {

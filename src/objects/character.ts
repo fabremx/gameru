@@ -1,3 +1,5 @@
+import { retrieveAlienDialogs } from "../dialogs/alien/dialogsHandler";
+import { ITalk } from "../interfaces/dialogs.interface";
 import { ICharacterSpriteConstructor } from "../interfaces/sprite.interface";
 
 export default class Character {
@@ -10,8 +12,9 @@ export default class Character {
 
   private talkKeyImage: Phaser.GameObjects.Image;
   private talkNotificationText: Phaser.GameObjects.Text;
+  private dialogCounter: number = 0;
 
-  private isSpeakableCharacter: boolean = true;
+  public isSpeakableCharacter: boolean = true;
 
   constructor({ scene, x, y, name, sprite }: ICharacterSpriteConstructor) {
     this.scene = scene
@@ -29,6 +32,7 @@ export default class Character {
 
     this.scene.events.on(`OVERLAP_START_${name}`, () => this.initOverlapWithPlayer());
     this.scene.events.on(`OVERLAP_END_${name}`, () => this.endOverlapWithPlayer());
+    this.scene.events.on(`RESET_LAST_DIALOG_REPEATED_${name}`, () => this.dialogCounter = 0);
   }
 
   add() {
@@ -48,11 +52,21 @@ export default class Character {
   }
 
   getDialogs(): string[] {
-    return [
-      'test',
-      'Salut à toi joueur, je suis une boite de dialogue avec du texte à l\'inérieur. J\'essaye d\'écrire un très très long texte pour voir comment se comporte les retours à la ligne dans cette boite. Esperons que cela marche bien',
-      'Profite de pouvoir ta baller sur la carte. A plus'
-    ]
+    const currentTalk: ITalk = retrieveAlienDialogs()
+    return currentTalk.dialogs[this.dialogCounter];
+  }
+  prepareNextDialog() {
+    const currentTalk: ITalk = retrieveAlienDialogs()
+    const isLastTalk = this.dialogCounter === currentTalk.dialogs.length - 1
+
+    if (isLastTalk) {
+      if (currentTalk.repeatLast) return;
+
+      this.dialogCounter = 0;
+      return;
+    }
+
+    this.dialogCounter += 1;
   }
 
   private initOverlapWithPlayer() {
@@ -73,7 +87,12 @@ export default class Character {
   }
 
   private destroyTalkNotification() {
-    this.talkKeyImage.destroy();
-    this.talkNotificationText.destroy();
+    if (this.talkKeyImage) {
+      this.talkKeyImage.destroy();
+    }
+
+    if (this.talkNotificationText) {
+      this.talkNotificationText.destroy();
+    }
   }
 }
