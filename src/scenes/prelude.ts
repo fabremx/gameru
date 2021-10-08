@@ -90,9 +90,9 @@ export default class PreludeScene extends Phaser.Scene {
   }
 
   update() {
-    this.player.handleInputs();
+    this.player.handleMovements();
+    this.player.handleDialogs();
     this.player.handleOverlapWith([this.developer]);
-    this.player.handleDialogWith([this.developer])
 
     this.background.x -= 0.05;
     this.background2.x -= 0.15;

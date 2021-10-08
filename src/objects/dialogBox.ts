@@ -92,7 +92,7 @@ export default class DialogBox {
         this.letterCounter = currentDialog.length;
     }
     private endDialog() {
-        this.scene.events.emit('dialogEnd');
+        this.scene.events.emit('END_DIALOG');
         this.destroy();
     }
     private readNextDialog() {

@@ -21,29 +21,22 @@ export default class Player {
     // Movement
     private xAxisForce: number = 0.015;
     private jumpVelocity: number = 11;
+    private canMove: boolean = true;
 
     anims: Phaser.Animations.AnimationManager;
 
     public canTalk: boolean = false;
-    public canMove: boolean = true;
-
-    // TODO: Move Talk notification
-    private talkKeyImage: Phaser.GameObjects.Image;
-    private talkNotificationText: Phaser.GameObjects.Text;
 
     // Dialog
     private dialogBox: DialogBox;
     private activeDialog: boolean = false;
 
+    private overlappedCharacter: Character;
 
     constructor({ scene, x, y, sprite }: IPlayerSpriteConstructor) {
         this.scene = scene
         this.x = x;
         this.y = y;
-
-        // TODO: Move
-        this.scene.load.image("keyTalk", 'assets/images/keyE.png');
-        this.scene.events.on('dialogEnd', () => this.activeDialog = false, this);
 
         this.scene.load.spritesheet("player", sprite.path, {
             frameWidth: sprite.width,
@@ -51,6 +44,7 @@ export default class Player {
             margin: sprite.margin,
             spacing: sprite.spacing,
         });
+        this.scene.events.on('END_DIALOG', () => this.endDialog());
 
         this.anims = this.scene.anims;
         this.anims.create({
@@ -92,48 +86,60 @@ export default class Player {
         this.sprite.destroy();
     }
 
-    handleDialogWith(characters: Character[]) {
-        characters.forEach((character: Character) => {
-            handlerOverlap(this, character, 100, {
-                startCallback: () => this.createTalkNotification(character),
-                endCallback: () => this.destroyTalkNotification()
-            })
-        })
-    }
-
     handleOverlapWith(characters: Character[]) {
         characters.forEach((character: Character) => {
             handlerOverlap(this, character, 100, {
-                startCallback: () => this.createTalkNotification(character),
-                endCallback: () => this.destroyTalkNotification()
+                startCallback: () => {
+                    this.canTalk = true;
+                    this.overlappedCharacter = character;
+                    this.scene.events.emit(`OVERLAP_START_${character.name}`);
+                },
+                endCallback: () => {
+                    this.canTalk = false;
+                    this.overlappedCharacter = null;
+                    this.scene.events.emit(`OVERLAP_END_${character.name}`);
+                }
             })
         })
     }
 
-    private createTalkNotification(character: Character) {
-        this.canTalk = true;
-        this.talkKeyImage = this.scene.add.image(character.sprite.x - 30, character.sprite.y - 85, "keyTalk", 0);
-        this.talkNotificationText = this.scene.add.text(character.sprite.x, character.sprite.y - 100, 'Parler', {
-            font: "32px Arial",
-            color: 'white',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-        });
+    private startDialog() {
+        this.canMove = false;
+        const characterDialogs = this.overlappedCharacter.getDialogs()
+        this.dialogBox = new DialogBox({
+            scene: this.scene, dialogs: characterDialogs
+        })
+        this.dialogBox.display();
+        this.activeDialog = true;
+
+    }
+    private endDialog() {
+        this.canMove = true;
+        this.activeDialog = false
     }
 
-    private destroyTalkNotification() {
-        this.canTalk = false;
-        this.talkKeyImage.destroy();
-        this.talkNotificationText.destroy();
+    handleDialogs(): void {
+        const isActionKeyDown = this.actionInput.justDown();
+        const isSkipDialogDown = this.passDialogInput.justDown();
+
+        if (this.activeDialog && isSkipDialogDown) {
+            this.dialogBox.handleSkip();
+        }
+        if (this.canTalk && isActionKeyDown && !this.activeDialog) {
+            this.startDialog();
+        }
     }
 
-    handleInputs(): void {
+    handleMovements(): void {
+        if (!this.canMove) {
+            return;
+        }
+
         const velocity = this.sprite.body.velocity;
 
         const isRightKeyDown = this.rightInput.isDown();
         const isLeftKeyDown = this.leftInput.isDown();
         const isJumpKeyDown = this.jumpInput.isDown();
-        const isActionKeyDown = this.actionInput.justDown();
-        const isSkipDialogDown = this.passDialogInput.justDown();
 
         if (isLeftKeyDown) {
             this.sprite.setFlipX(true);
@@ -142,23 +148,6 @@ export default class Player {
             this.sprite.setFlipX(false);
             this.sprite.applyForce(new Phaser.Math.Vector2(this.xAxisForce, 0));
         }
-
-        /** Dialog handle */
-        if (this.activeDialog && isSkipDialogDown) {
-            this.dialogBox.handleSkip();
-        }
-        if (this.canTalk && isActionKeyDown && !this.activeDialog) {
-            this.dialogBox = new DialogBox({
-                scene: this.scene, dialogs: [
-                    'test',
-                    'Salut à toi joueur, je suis une boite de dialogue avec du texte à l\'inérieur. J\'essaye d\'écrire un très très long texte pour voir comment se comporte les retours à la ligne dans cette boite. Esperons que cela marche bien',
-                    'Profite de pouvoir ta baller sur la carte. A plus'
-                ]
-            })
-            this.dialogBox.display();
-            this.activeDialog = true;
-        }
-        /** Dialog handle END */
 
         if (isJumpKeyDown) {
             this.sprite.setVelocityY(-this.jumpVelocity);
