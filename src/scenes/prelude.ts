@@ -3,6 +3,7 @@ import Character from "../objects/character";
 import SceneTitle from "../objects/sceneTitle";
 import Camera from "../objects/camera";
 import Map from "../objects/map";
+import { DECORATION_LAYER_NAME, DEVELOPER_SPAW_POINT_NAME, GO_TO_CAVE_ZONE_NAME, OBJECTS_LAYER_NAME, PLATFORMS_LAYER_NAME, PLAYER_SPAW_POINT_NAME } from "../constants/tilemap";
 
 export default class PreludeScene extends Phaser.Scene {
   private player: Player;
@@ -17,7 +18,7 @@ export default class PreludeScene extends Phaser.Scene {
   background3: any;
 
   constructor() {
-    super({ key: "MainScene" });
+    super({ key: "PreludeScene" });
   }
 
   preload(): void {
@@ -33,8 +34,6 @@ export default class PreludeScene extends Phaser.Scene {
 
     this.player = new Player({
       scene: this,
-      x: this.scale.width - 100,
-      y: 700,
       sprite: {
         path: "assets/sprites/player.png",
         width: 32,
@@ -46,8 +45,6 @@ export default class PreludeScene extends Phaser.Scene {
 
     this.developer = new Character({
       scene: this,
-      x: this.scale.width + 650,
-      y: 970,
       name: "alien",
       sprite: {
         path: "assets/sprites/alien.png",
@@ -58,14 +55,14 @@ export default class PreludeScene extends Phaser.Scene {
       }
     });
 
-    this.camera = new Camera({ scene: this, map: this.map });
+    this.camera = new Camera({ scene: this });
   }
 
   create(): void {
     // Display Map
     this.map.add();
-    const platformLayer = this.map.createLayer({ name: 'platforms', options: { collision: true, depth: 10 } });
-    this.map.createLayer({ name: 'world', options: { collision: false, depth: 15 } })
+    const platformLayer = this.map.createLayer({ name: PLATFORMS_LAYER_NAME, options: { collision: true, depth: 10 } });
+    this.map.createLayer({ name: DECORATION_LAYER_NAME, options: { collision: false, depth: 15 } })
 
     // World properties
     this.matter.world.convertTilemapLayer(platformLayer);
@@ -76,10 +73,13 @@ export default class PreludeScene extends Phaser.Scene {
     this.background3 = this.add.image(this.scale.width - 200, this.scale.height - 200, 'background3');
 
     var noCollisionGroup = this.matter.world.nextGroup(true);
+    const playerSpawnPoint = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === PLAYER_SPAW_POINT_NAME);
+    const developerSpawnPoint = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === DEVELOPER_SPAW_POINT_NAME);
+    const gotoCaveZone = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === GO_TO_CAVE_ZONE_NAME);
 
     this.sceneTitle.add();
-    this.player.add();
-    this.developer.add();
+    this.player.add(playerSpawnPoint.x, playerSpawnPoint.y);
+    this.developer.add(developerSpawnPoint.x, developerSpawnPoint.y);
 
     this.player.collideWith(noCollisionGroup);
     this.developer.collideWith(noCollisionGroup);

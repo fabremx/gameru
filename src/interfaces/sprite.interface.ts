@@ -1,7 +1,5 @@
 export interface IPlayerSpriteConstructor {
   scene: Phaser.Scene;
-  x: number;
-  y: number;
   sprite: {
     path: string;
     width: number;
@@ -13,8 +11,6 @@ export interface IPlayerSpriteConstructor {
 
 export interface ICharacterSpriteConstructor {
   scene: Phaser.Scene;
-  x: number;
-  y: number;
   name: string;
   sprite: {
     path: string;

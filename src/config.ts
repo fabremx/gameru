@@ -1,3 +1,4 @@
+import CaveScene from "./scenes/cave";
 import PreludeScene from "./scenes/prelude";
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
@@ -12,5 +13,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
       debug: true
     }
   },
-  scene: [PreludeScene],
+  scene: [PreludeScene, CaveScene],
 };

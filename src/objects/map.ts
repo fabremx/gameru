@@ -2,8 +2,9 @@ import { IMapConstructor, IMapLayer } from "../interfaces/map.interface";
 
 export default class Map {
     private scene: Phaser.Scene;
-    private tilemap: Phaser.Tilemaps.Tilemap;
     private tileset: Phaser.Tilemaps.Tileset;
+
+    tilemap: Phaser.Tilemaps.Tilemap;
 
     constructor({
         scene,

@@ -4,7 +4,7 @@ import Player from "./player";
 export default class Camera {
     private scene: Phaser.Scene;
 
-    constructor({ scene, map }: ICameraConstructor) {
+    constructor({ scene }: ICameraConstructor) {
         this.scene = scene;
     }
 

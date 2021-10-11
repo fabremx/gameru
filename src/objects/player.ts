@@ -33,10 +33,8 @@ export default class Player {
 
     private overlappedCharacter: Character;
 
-    constructor({ scene, x, y, sprite }: IPlayerSpriteConstructor) {
+    constructor({ scene, sprite }: IPlayerSpriteConstructor) {
         this.scene = scene
-        this.x = x;
-        this.y = y;
 
         this.scene.load.spritesheet("player", sprite.path, {
             frameWidth: sprite.width,
@@ -69,7 +67,10 @@ export default class Player {
         this.passDialogInput = new MultiKey(this.scene, [SPACE]);
     }
 
-    add() {
+    add(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+
         this.sprite = this.scene.matter.add.sprite(0, 0, "player", 0);
         this.sprite
             .setScale(2)

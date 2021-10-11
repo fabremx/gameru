@@ -16,10 +16,8 @@ export default class Character {
 
   public isSpeakableCharacter: boolean = true;
 
-  constructor({ scene, x, y, name, sprite }: ICharacterSpriteConstructor) {
+  constructor({ scene, name, sprite }: ICharacterSpriteConstructor) {
     this.scene = scene
-    this.x = x;
-    this.y = y;
     this.name = name;
 
     this.scene.load.image("keyTalk", 'assets/images/keyE.png');
@@ -35,7 +33,10 @@ export default class Character {
     this.scene.events.on(`RESET_LAST_DIALOG_REPEATED_${name}`, () => this.dialogCounter = 0);
   }
 
-  add() {
+  add(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+
     this.sprite = this.scene.matter.add.sprite(this.x, this.y, this.name, 0);
 
     this.sprite
