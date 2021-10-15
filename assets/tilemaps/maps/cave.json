@@ -28,8 +28,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2309.33333333333,
-                 "y":31
+                 "x":2310.66666666667,
+                 "y":18.666666666663
                 }, 
                 {
                  "height":0,
@@ -50,7 +50,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":4,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.7.2",
@@ -63,7 +63,7 @@
          "imageheight":936,
          "imagewidth":914,
          "margin":0,
-         "name":"tiles",
+         "name":"Tiles",
          "properties":[
                 {
                  "name":"collides",

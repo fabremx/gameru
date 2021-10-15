@@ -1,6 +1,6 @@
 import { IPlayerSpriteConstructor } from "../interfaces/sprite.interface";
 import handlerOverlap from "../utils/overlap";
-import MultiKey from "../utils/multi-key";
+import MultiKey from "../utils/multiKey";
 import Character from "./character";
 import DialogBox from "./dialogBox";
 
@@ -122,6 +122,10 @@ export default class Player {
         this.canMove = true;
         this.activeDialog = false
         this.overlappedCharacter.prepareNextDialog()
+    }
+
+    isOverlapZone(zone: Phaser.GameObjects.Rectangle): boolean {
+        return Phaser.Geom.Intersects.RectangleToRectangle(this.sprite.getBounds(), zone.getBounds());
     }
 
     handleDialogs(): void {

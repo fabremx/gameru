@@ -60,15 +60,15 @@
                  "y":1330.33333333333
                 }, 
                 {
-                 "height":55,
+                 "height":40,
                  "id":6,
                  "name":"gotoCave",
-                 "rotation":0,
+                 "rotation":180,
                  "type":"",
                  "visible":true,
-                 "width":258,
-                 "x":2740,
-                 "y":1694
+                 "width":181,
+                 "x":2961,
+                 "y":1750.33333333333
                 }],
          "opacity":1,
          "type":"objectgroup",

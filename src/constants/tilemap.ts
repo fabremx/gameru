@@ -7,5 +7,9 @@ export const DECORATION_LAYER_NAME = 'world'
 export const PLAYER_SPAW_POINT_NAME = 'playerSpawn'
 export const DEVELOPER_SPAW_POINT_NAME = 'developerSpawn'
 
+// Maps
+export const PRELUDE_MAP = 'preludeMap';
+export const CAVE_MAP = 'caveMap';
+
 // Zones
 export const GO_TO_CAVE_ZONE_NAME = 'gotoCave'

@@ -4,6 +4,8 @@ import SceneTitle from "../objects/sceneTitle";
 import Camera from "../objects/camera";
 import Map from "../objects/map";
 import { DECORATION_LAYER_NAME, DEVELOPER_SPAW_POINT_NAME, GO_TO_CAVE_ZONE_NAME, OBJECTS_LAYER_NAME, PLATFORMS_LAYER_NAME, PLAYER_SPAW_POINT_NAME } from "../constants/tilemap";
+import Zone from "../objects/zone";
+import { CAVE_SCENE, PRELUDE_SCENE } from "../constants/scenes";
 
 export default class PreludeScene extends Phaser.Scene {
   private player: Player;
@@ -13,12 +15,14 @@ export default class PreludeScene extends Phaser.Scene {
   private camera: Camera;
   private map: Map;
 
+  private gotoCaveZone: Phaser.GameObjects.Rectangle;
+
   background: any;
   background2: any;
   background3: any;
 
   constructor() {
-    super({ key: "PreludeScene" });
+    super({ key: PRELUDE_SCENE });
   }
 
   preload(): void {
@@ -72,15 +76,20 @@ export default class PreludeScene extends Phaser.Scene {
     this.background2 = this.add.image(this.scale.width - 200, this.scale.height - 300, 'background2');
     this.background3 = this.add.image(this.scale.width - 200, this.scale.height - 200, 'background3');
 
-    var noCollisionGroup = this.matter.world.nextGroup(true);
+    // Create zones
+    this.gotoCaveZone = Zone.create(this, this.map.tilemap, GO_TO_CAVE_ZONE_NAME)
+
+    // Title
+    this.sceneTitle.add();
+
+    // Add player and characters
     const playerSpawnPoint = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === PLAYER_SPAW_POINT_NAME);
     const developerSpawnPoint = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === DEVELOPER_SPAW_POINT_NAME);
-    const gotoCaveZone = this.map.tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === GO_TO_CAVE_ZONE_NAME);
-
-    this.sceneTitle.add();
     this.player.add(playerSpawnPoint.x, playerSpawnPoint.y);
     this.developer.add(developerSpawnPoint.x, developerSpawnPoint.y);
 
+    // Collision groups
+    const noCollisionGroup = this.matter.world.nextGroup(true);
     this.player.collideWith(noCollisionGroup);
     this.developer.collideWith(noCollisionGroup);
 
@@ -93,6 +102,15 @@ export default class PreludeScene extends Phaser.Scene {
     this.player.handleMovements();
     this.player.handleDialogs();
     this.player.handleOverlapWith([this.developer]);
+
+    if (this.player.isOverlapZone(this.gotoCaveZone)) {
+      this.cameras.main.fadeOut(10)
+      // this.map.tilemap.destroy()
+      // this.scene.remove();
+      // this.map.destroy();
+      // this.cameras.main.destroy();
+      this.scene.start(CAVE_SCENE);
+    }
 
     this.background.x -= 0.05;
     this.background2.x -= 0.15;

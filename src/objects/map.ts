@@ -1,3 +1,4 @@
+import { PRELUDE_MAP } from "../constants/tilemap";
 import { IMapConstructor, IMapLayer } from "../interfaces/map.interface";
 
 export default class Map {
@@ -14,11 +15,11 @@ export default class Map {
         this.scene = scene;
 
         this.scene.load.image("tiles", tilesPath);
-        this.scene.load.tilemapTiledJSON("map", mapPath);
+        this.scene.load.tilemapTiledJSON(PRELUDE_MAP, mapPath);
     }
 
     add() {
-        this.tilemap = this.scene.make.tilemap({ key: "map" });
+        this.tilemap = this.scene.make.tilemap({ key: PRELUDE_MAP });
         this.tileset = this.tilemap.addTilesetImage("Tiles", "tiles");
     }
 
@@ -42,6 +43,10 @@ export default class Map {
             width: this.tilemap.widthInPixels,
             height: this.tilemap.heightInPixels
         }
+    }
+
+    destroy() {
+        this.tilemap.destroy();
     }
 }
 
