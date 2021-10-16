@@ -3,13 +3,18 @@ import handlerOverlap from "../utils/overlap";
 import MultiKey from "../utils/multiKey";
 import Character from "./character";
 import DialogBox from "./dialogBox";
+import { ISensors } from "../interfaces/player.interface";
 
 export default class Player {
-    sprite: Phaser.Physics.Matter.Sprite;
-    scene: Phaser.Scene;
+    public sprite: Phaser.Physics.Matter.Sprite;
+    private scene: Phaser.Scene;
 
-    x: number;
-    y: number;
+    private x: number;
+    private y: number;
+
+    // Bodies
+    private sensors: ISensors;
+    private isTouching = { left: false, right: false, ground: false };
 
     // Keys
     private leftInput: MultiKey;
@@ -23,7 +28,7 @@ export default class Player {
     private jumpVelocity: number = 11;
     private canMove: boolean = true;
 
-    anims: Phaser.Animations.AnimationManager;
+    private anims: Phaser.Animations.AnimationManager;
 
     public canTalk: boolean = false;
 
@@ -72,19 +77,75 @@ export default class Player {
         this.y = y;
 
         this.sprite = this.scene.matter.add.sprite(0, 0, "player", 0);
+
+        const { body, bodies } = this.scene.matter; // Native Matter modules
+        const { width: w, height: h } = this.sprite;
+        const mainBody = bodies.rectangle(0, 0, w * 0.6, h, { chamfer: { radius: 10 } });
+        this.sensors = {
+            bottom: bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
+            left: bodies.rectangle(-w * 0.35, 0, 2, h * 0.5, { isSensor: true }),
+            right: bodies.rectangle(w * 0.35, 0, 2, h * 0.5, { isSensor: true })
+        };
+        const compoundBody = body.create({
+            parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right],
+            frictionStatic: 0,
+            frictionAir: 0.02,
+            friction: 0.1,
+            // The offset here allows us to control where the sprite is placed relative to the
+            // matter body's x and y - here we want the sprite centered over the matter body.
+            render: { sprite: { xOffset: 0.5, yOffset: 0.5 } },
+        });
+
+        this.sprite.setExistingBody(compoundBody);
         this.sprite
             .setScale(2)
             .setFixedRotation() // Sets inertia to infinity so the player can't rotate
             .setPosition(this.x, this.y)
             .setDepth(20);
+
+        this.scene.matterCollision.addOnCollideStart({
+            objectA: [this.sensors.bottom, this.sensors.left, this.sensors.right],
+            callback: this.onSensorCollide,
+            context: this
+        });
+        this.scene.matterCollision.addOnCollideActive({
+            objectA: [this.sensors.bottom, this.sensors.left, this.sensors.right],
+            callback: this.onSensorCollide,
+            context: this
+        });
+    }
+
+    onSensorCollide({ bodyA, bodyB, pair }: any) {
+        if (bodyB.isSensor) return; // We only care about collisions with physical objects
+
+        switch (bodyA) {
+            case this.sensors.left:
+                this.isTouching.left = true;
+
+                if (pair.separation > 0.5) {
+                    this.sprite.x += pair.separation - 0.5;
+                }
+            case this.sensors.right:
+                this.isTouching.right = true;
+
+                if (pair.separation > 0.5) {
+                    this.sprite.x -= pair.separation - 0.5;
+                }
+            case this.sensors.bottom:
+                this.isTouching.ground = true;
+            default:
+                break;
+        }
+    }
+
+    resetTouching() {
+        this.isTouching.left = false;
+        this.isTouching.right = false;
+        this.isTouching.ground = false;
     }
 
     collideWith(group: number) {
         this.sprite.setCollisionGroup(group)
-    }
-
-    destroy() {
-        this.sprite.destroy();
     }
 
     handleOverlapWith(characters: Character[]) {
@@ -150,20 +211,42 @@ export default class Player {
         const isRightKeyDown = this.rightInput.isDown();
         const isLeftKeyDown = this.leftInput.isDown();
         const isJumpKeyDown = this.jumpInput.isDown();
+        const isOnGround = this.isTouching.ground;
+        const isInAir = !isOnGround;
 
         if (isLeftKeyDown) {
             this.sprite.setFlipX(true);
-            this.sprite.applyForce(new Phaser.Math.Vector2(-this.xAxisForce, 0));
+            // Don't let the player push things left if they in the air
+            if (!(isInAir && this.isTouching.left)) {
+                this.sprite.applyForce(new Phaser.Math.Vector2(-this.xAxisForce, 0));
+            }
         } else if (isRightKeyDown) {
             this.sprite.setFlipX(false);
-            this.sprite.applyForce(new Phaser.Math.Vector2(this.xAxisForce, 0));
+
+            // Don't let the player push things right if they in the air
+            if (!(isInAir && this.isTouching.right)) {
+                this.sprite.applyForce(new Phaser.Math.Vector2(this.xAxisForce, 0));
+            }
         }
 
         if (isJumpKeyDown) {
             this.sprite.setVelocityY(-this.jumpVelocity);
         }
 
+        // Limit horizontal speed
         if (velocity.x > 7) this.sprite.setVelocityX(7);
         else if (velocity.x < -7) this.sprite.setVelocityX(-7);
+    }
+
+    destroy() {
+        const sensors = [
+            this.sensors.bottom,
+            this.sensors.left,
+            this.sensors.right
+        ];
+        this.scene.matterCollision.removeOnCollideStart({ objectA: sensors });
+        this.scene.matterCollision.removeOnCollideActive({ objectA: sensors });
+
+        this.sprite.destroy();
     }
 }

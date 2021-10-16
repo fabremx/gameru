@@ -17,6 +17,8 @@ export default class PreludeScene extends Phaser.Scene {
 
   private gotoCaveZone: Phaser.GameObjects.Rectangle;
 
+  private zoneTriggered: boolean = false;
+
   background: any;
   background2: any;
   background3: any;
@@ -99,17 +101,19 @@ export default class PreludeScene extends Phaser.Scene {
   }
 
   update() {
+    if (this.zoneTriggered) return;
+
     this.player.handleMovements();
     this.player.handleDialogs();
     this.player.handleOverlapWith([this.developer]);
 
     if (this.player.isOverlapZone(this.gotoCaveZone)) {
-      this.cameras.main.fadeOut(10)
-      // this.map.tilemap.destroy()
-      // this.scene.remove();
-      // this.map.destroy();
-      // this.cameras.main.destroy();
-      this.scene.start(CAVE_SCENE);
+      this.zoneTriggered = true;
+
+      this.cameras.main.fadeOut(200);
+      this.cameras.main.on('camerafadeoutcomplete', () => {
+        this.scene.start(CAVE_SCENE);
+      }, this);
     }
 
     this.background.x -= 0.05;

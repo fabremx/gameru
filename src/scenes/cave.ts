@@ -54,6 +54,8 @@ export default class CaveScene extends Phaser.Scene {
 
     create(): void {
         // Display Map
+        this.cameras.main.fadeIn(500);
+
         const tilemap = this.make.tilemap({ key: CAVE_MAP });
         const tileset1 = tilemap.addTilesetImage("Tiles", "tiles");
         const tileset2 = tilemap.addTilesetImage("tiles2", "tiles2");
