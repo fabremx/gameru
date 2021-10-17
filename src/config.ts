@@ -30,7 +30,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   height: window.innerHeight * window.devicePixelRatio,
   backgroundColor: '#6FE7FC',
   parent: "game",
-  scene: [PreludeScene, CaveScene],
+  scene: [CaveScene, PreludeScene],
   physics: {
     default: "matter",
     matter: {

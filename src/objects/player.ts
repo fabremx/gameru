@@ -70,6 +70,8 @@ export default class Player {
         this.jumpInput = new MultiKey(this.scene, [UP, W]);
         this.actionInput = new MultiKey(this.scene, [E]);
         this.passDialogInput = new MultiKey(this.scene, [SPACE]);
+
+        this.scene.matter.world.on("beforeupdate", this.resetTouching, this);
     }
 
     add(x: number, y: number) {
@@ -80,7 +82,7 @@ export default class Player {
 
         const { body, bodies } = this.scene.matter; // Native Matter modules
         const { width: w, height: h } = this.sprite;
-        const mainBody = bodies.rectangle(0, 0, w * 0.6, h, { chamfer: { radius: 10 } });
+        const mainBody = bodies.rectangle(0, 0, w * 0.6, h);
         this.sensors = {
             bottom: bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
             left: bodies.rectangle(-w * 0.35, 0, 2, h * 0.5, { isSensor: true }),
@@ -217,16 +219,16 @@ export default class Player {
         if (isLeftKeyDown) {
             this.sprite.setFlipX(true);
             // Don't let the player push things left if they in the air
-            if (!(isInAir && this.isTouching.left)) {
-                this.sprite.applyForce(new Phaser.Math.Vector2(-this.xAxisForce, 0));
-            }
+            if (isInAir && this.isTouching.left) return;
+            else if (!isInAir && this.isTouching.left) this.sprite.setVelocityX(-2)
+            else this.sprite.setVelocityX(-5)
         } else if (isRightKeyDown) {
             this.sprite.setFlipX(false);
 
             // Don't let the player push things right if they in the air
-            if (!(isInAir && this.isTouching.right)) {
-                this.sprite.applyForce(new Phaser.Math.Vector2(this.xAxisForce, 0));
-            }
+            if (isInAir && this.isTouching.right) return;
+            else if (!isInAir && this.isTouching.right) this.sprite.setVelocityX(2)
+            else this.sprite.setVelocityX(5)
         }
 
         if (isJumpKeyDown) {

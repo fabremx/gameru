@@ -4,6 +4,9 @@ import SceneTitle from "../objects/sceneTitle";
 import Camera from "../objects/camera";
 import { CAVE_MAP, DEVELOPER_SPAW_POINT_NAME, OBJECTS_LAYER_NAME, PLATFORMS_LAYER_NAME, PLAYER_SPAW_POINT_NAME } from "../constants/tilemap";
 import { CAVE_SCENE } from "../constants/scenes";
+import { SPAWN_BOX_INTERRUPTOR_LEVEL_2, SPAWN_BOX_LEVEL_1, SPAWN_BOX_LEVEL_2 } from "../constants/caveSceneObjects";
+import Box from "../objects/box";
+import Interruptor from "../objects/interruptor";
 
 export default class CaveScene extends Phaser.Scene {
     private player: Player;
@@ -11,6 +14,9 @@ export default class CaveScene extends Phaser.Scene {
 
     private sceneTitle: SceneTitle;
     private camera: Camera;
+
+    private boxes: Box[] = [];
+    private interruptorBoxLvl2: Interruptor;
 
     constructor() {
         super({ key: CAVE_SCENE });
@@ -49,6 +55,18 @@ export default class CaveScene extends Phaser.Scene {
             }
         });
 
+        this.load.image('box', 'assets/images/box.png');
+        this.boxes = [
+            // Level 1
+            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_1 }),
+            // Level 2
+            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_2 }),
+            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_2 })
+        ]
+
+        this.load.image('interruptor', 'assets/sprites/switchRedMid.png');
+        this.interruptorBoxLvl2 = new Interruptor({ scene: this, spawnKey: SPAWN_BOX_INTERRUPTOR_LEVEL_2 })
+
         this.camera = new Camera({ scene: this });
     }
 
@@ -85,6 +103,13 @@ export default class CaveScene extends Phaser.Scene {
         // Camera
         this.camera.add(tilemap.widthInPixels, tilemap.heightInPixels);
         this.camera.follow(this.player)
+
+        // Level 1
+        this.boxes[0].addWithSpawnPoint(tilemap)
+
+        // Level 2
+        this.interruptorBoxLvl2.addWithSpawnPoint(tilemap)
+        this.interruptorBoxLvl2.collideWith(noCollisionGroup);
     }
 
     update() {
