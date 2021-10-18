@@ -1,14 +1,17 @@
 import { retrieveAlienDialogs } from "../dialogs/alien/dialogsHandler";
 import { ITalk } from "../interfaces/dialogs.interface";
 import { ICharacterSpriteConstructor } from "../interfaces/sprite.interface";
+import Player from "./player";
 
 export default class Character {
   sprite: Phaser.Physics.Matter.Sprite;
-  scene: Phaser.Scene;
+  private scene: Phaser.Scene;
 
-  x: number;
-  y: number;
-  name: string;
+  private x: number;
+  private y: number;
+  private key: string;
+
+  private isAlreadyOverlap: boolean = false;
 
   private talkKeyImage: Phaser.GameObjects.Image;
   private talkNotificationText: Phaser.GameObjects.Text;
@@ -16,28 +19,28 @@ export default class Character {
 
   public isSpeakableCharacter: boolean = true;
 
-  constructor({ scene, name, sprite }: ICharacterSpriteConstructor) {
+  constructor({ scene, key, sprite }: ICharacterSpriteConstructor) {
     this.scene = scene
-    this.name = name;
+    this.key = key;
 
     this.scene.load.image("keyTalk", 'assets/images/keyE.png');
-    this.scene.load.spritesheet(name, sprite.path, {
+    this.scene.load.spritesheet(key, sprite.path, {
       frameWidth: sprite.width,
       frameHeight: sprite.height,
       margin: sprite.margin,
       spacing: sprite.spacing,
     });
 
-    this.scene.events.on(`OVERLAP_START_${name}`, () => this.initOverlapWithPlayer());
-    this.scene.events.on(`OVERLAP_END_${name}`, () => this.endOverlapWithPlayer());
-    this.scene.events.on(`RESET_LAST_DIALOG_REPEATED_${name}`, () => this.dialogCounter = 0);
+    this.scene.events.on(`RESET_LAST_DIALOG_REPEATED_${key}`, () => this.dialogCounter = 0);
   }
 
   add(x: number, y: number) {
     this.x = x;
     this.y = y;
 
-    this.sprite = this.scene.matter.add.sprite(this.x, this.y, this.name, 0);
+    this.sprite = this.scene.matter.add.sprite(this.x, this.y, this.key, 0);
+    this.sprite.setDataEnabled()
+    this.sprite.setData({ type: 'character', key: this.key });
 
     this.sprite
       .setPosition(this.x, this.y)
@@ -70,12 +73,23 @@ export default class Character {
     this.dialogCounter += 1;
   }
 
-  private initOverlapWithPlayer() {
-    if (!this.isSpeakableCharacter) return
-    this.createTalkNotification()
-  }
-  private endOverlapWithPlayer() {
-    this.destroyTalkNotification()
+  handleOverlapWith(player: Player) {
+    const isOverlaping = this.scene.matter.overlap(this.sprite, [player.sprite]);
+
+    const isFirstOverlapping = isOverlaping && !this.isAlreadyOverlap;
+    const isLastOverlapping = !isOverlaping && this.isAlreadyOverlap;
+
+    if (isFirstOverlapping && this.isSpeakableCharacter) {
+      this.isAlreadyOverlap = true;
+      this.createTalkNotification();
+      this.scene.events.emit(`OVERLAP_CHARACTER_START`, this);
+    }
+
+    if (isLastOverlapping) {
+      this.isAlreadyOverlap = false;
+      this.destroyTalkNotification();
+      this.scene.events.emit(`OVERLAP_CHARACTER_END`);
+    }
   }
 
   private createTalkNotification() {

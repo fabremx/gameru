@@ -11,7 +11,7 @@ export interface IPlayerSpriteConstructor {
 
 export interface ICharacterSpriteConstructor {
   scene: Phaser.Scene;
-  name: string;
+  key: string;
   sprite: {
     path: string;
     width: number;

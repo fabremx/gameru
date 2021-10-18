@@ -1,5 +1,4 @@
 import { IPlayerSpriteConstructor } from "../interfaces/sprite.interface";
-import handlerOverlap from "../utils/overlap";
 import MultiKey from "../utils/multiKey";
 import Character from "./character";
 import DialogBox from "./dialogBox";
@@ -24,7 +23,6 @@ export default class Player {
     private passDialogInput: MultiKey;
 
     // Movement
-    private xAxisForce: number = 0.015;
     private jumpVelocity: number = 11;
     private canMove: boolean = true;
 
@@ -71,6 +69,15 @@ export default class Player {
         this.actionInput = new MultiKey(this.scene, [E]);
         this.passDialogInput = new MultiKey(this.scene, [SPACE]);
 
+        this.scene.events.on('OVERLAP_CHARACTER_START', (character: Character) => {
+            this.canTalk = true
+            this.overlappedCharacter = character
+        });
+        this.scene.events.on('OVERLAP_CHARACTER_END', () => {
+            this.canTalk = false
+            this.overlappedCharacter = null
+        });
+
         this.scene.matter.world.on("beforeupdate", this.resetTouching, this);
     }
 
@@ -79,6 +86,8 @@ export default class Player {
         this.y = y;
 
         this.sprite = this.scene.matter.add.sprite(0, 0, "player", 0);
+        this.sprite.setDataEnabled()
+        this.sprite.setData({ type: 'player' });
 
         const { body, bodies } = this.scene.matter; // Native Matter modules
         const { width: w, height: h } = this.sprite;
@@ -150,36 +159,15 @@ export default class Player {
         this.sprite.setCollisionGroup(group)
     }
 
-    handleOverlapWith(characters: Character[]) {
-        characters.forEach((character: Character) => {
-            handlerOverlap(this, character, 100, {
-                startCallback: () => {
-                    this.canTalk = true;
-                    this.overlappedCharacter = character;
-                    this.scene.events.emit(`OVERLAP_START_${character.name}`);
-                },
-                endCallback: () => {
-                    this.canTalk = false;
-                    this.overlappedCharacter = null;
-                    this.scene.events.emit(`OVERLAP_END_${character.name}`);
-                }
-            })
-        })
-    }
-
     private startDialog() {
-        if (!this.overlappedCharacter.isSpeakableCharacter) {
-            return
-        }
-
         const characterDialogs = this.overlappedCharacter.getDialogs()
+
         this.canMove = false;
         this.dialogBox = new DialogBox({
             scene: this.scene, dialogs: characterDialogs
         })
         this.dialogBox.display();
         this.activeDialog = true;
-
     }
     private endDialog() {
         this.canMove = true;

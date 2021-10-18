@@ -4,7 +4,7 @@ import SceneTitle from "../objects/sceneTitle";
 import Camera from "../objects/camera";
 import { CAVE_MAP, DEVELOPER_SPAW_POINT_NAME, OBJECTS_LAYER_NAME, PLATFORMS_LAYER_NAME, PLAYER_SPAW_POINT_NAME } from "../constants/tilemap";
 import { CAVE_SCENE } from "../constants/scenes";
-import { SPAWN_BOX_INTERRUPTOR_LEVEL_2, SPAWN_BOX_LEVEL_1, SPAWN_BOX_LEVEL_2 } from "../constants/caveSceneObjects";
+import { CAVE_BOX_1_LVL_1, CAVE_BOX_1_LVL_2, CAVE_BOX_2_LVL_2, CAVE_INTERRUPTOR_LVL_2, SPAWN_BOX_INTERRUPTOR_LEVEL_2, SPAWN_BOX_LEVEL_1, SPAWN_BOX_LEVEL_2 } from "../constants/caveSceneObjects";
 import Box from "../objects/box";
 import Interruptor from "../objects/interruptor";
 
@@ -45,7 +45,7 @@ export default class CaveScene extends Phaser.Scene {
 
         this.developer = new Character({
             scene: this,
-            name: "alien",
+            key: "alien",
             sprite: {
                 path: "assets/sprites/alien.png",
                 width: 66,
@@ -58,14 +58,14 @@ export default class CaveScene extends Phaser.Scene {
         this.load.image('box', 'assets/images/box.png');
         this.boxes = [
             // Level 1
-            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_1 }),
+            new Box({ scene: this, key: CAVE_BOX_1_LVL_1, spawnKey: SPAWN_BOX_LEVEL_1 }),
             // Level 2
-            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_2 }),
-            new Box({ scene: this, spawnKey: SPAWN_BOX_LEVEL_2 })
+            new Box({ scene: this, key: CAVE_BOX_1_LVL_2, spawnKey: SPAWN_BOX_LEVEL_2 }),
+            new Box({ scene: this, key: CAVE_BOX_2_LVL_2, spawnKey: SPAWN_BOX_LEVEL_2 })
         ]
 
         this.load.image('interruptor', 'assets/sprites/switchRedMid.png');
-        this.interruptorBoxLvl2 = new Interruptor({ scene: this, spawnKey: SPAWN_BOX_INTERRUPTOR_LEVEL_2 })
+        this.interruptorBoxLvl2 = new Interruptor({ scene: this, key: CAVE_INTERRUPTOR_LVL_2, spawnKey: SPAWN_BOX_INTERRUPTOR_LEVEL_2 })
 
         this.camera = new Camera({ scene: this });
     }
@@ -114,5 +114,8 @@ export default class CaveScene extends Phaser.Scene {
 
     update() {
         this.player.handleMovements();
+        this.player.handleDialogs();
+        this.developer.handleOverlapWith(this.player);
+        this.interruptorBoxLvl2.handleOverlapWith(this.player);
     }
 }

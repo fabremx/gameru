@@ -47,7 +47,7 @@ export default class PreludeScene extends Phaser.Scene {
 
     this.developer = new Character({
       scene: this,
-      name: "alien",
+      key: "alien",
       sprite: {
         path: "assets/sprites/alien.png",
         width: 66,
@@ -97,7 +97,7 @@ export default class PreludeScene extends Phaser.Scene {
 
     this.player.handleMovements();
     this.player.handleDialogs();
-    this.player.handleOverlapWith([this.developer]);
+    this.developer.handleOverlapWith(this.player)
 
     if (this.player.isOverlapZone(this.gotoCaveZone)) {
       this.zoneTriggered = true;

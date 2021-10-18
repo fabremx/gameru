@@ -1,12 +1,13 @@
 import { OBJECTS_LAYER_NAME } from "../constants/tilemap";
 import { IItemConstructor } from "../interfaces/items.interface";
 import Item from "./item";
+import Player from "./player";
 
 export default class Interruptor extends Item {
-    private sprite: Phaser.Physics.Matter.Sprite;
-
     private actionKeyImage: Phaser.GameObjects.Image;
     private actionNotificationText: Phaser.GameObjects.Text;
+
+    private isAlreadyOverlap: boolean = false;
 
     constructor(params: IItemConstructor) {
         super(params)
@@ -14,7 +15,11 @@ export default class Interruptor extends Item {
 
     addWithSpawnPoint(tilemap: Phaser.Tilemaps.Tilemap) {
         const boxSpawnPoints = tilemap.findObject(OBJECTS_LAYER_NAME, obj => obj.name === this.spawnKey);
+
         this.sprite = this.scene.matter.add.sprite(boxSpawnPoints.x, boxSpawnPoints.y, 'interruptor', 0);
+        this.sprite.setDataEnabled()
+        this.sprite.setData({ type: 'item', key: this.key });
+
         this.sprite
             .setFixedRotation()
             .setFrictionStatic(0)
@@ -23,6 +28,20 @@ export default class Interruptor extends Item {
 
     collideWith(group: number) {
         this.sprite.setCollisionGroup(group)
+    }
+
+    handleOverlapWith(player: Player) {
+        const isOverlaping = this.scene.matter.overlap(this.sprite, [player.sprite]);
+
+        if (isOverlaping && !this.isAlreadyOverlap) {
+            this.isAlreadyOverlap = true;
+            this.createActionNotification();
+        }
+
+        if (!isOverlaping && this.isAlreadyOverlap) {
+            this.isAlreadyOverlap = false;
+            this.destroyActionNotification();
+        }
     }
 
     private createActionNotification() {
