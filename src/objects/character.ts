@@ -1,6 +1,7 @@
 import { retrieveAlienDialogs } from "../dialogs/alien/dialogsHandler";
 import { ITalk } from "../interfaces/dialogs.interface";
 import { ICharacterSpriteConstructor } from "../interfaces/sprite.interface";
+import isOverlapping from "../utils/overlap";
 import Player from "./player";
 
 export default class Character {
@@ -74,7 +75,7 @@ export default class Character {
   }
 
   handleOverlapWith(player: Player) {
-    const isOverlaping = this.scene.matter.overlap(this.sprite, [player.sprite]);
+    const isOverlaping = isOverlapping(player, this, 100);
 
     const isFirstOverlapping = isOverlaping && !this.isAlreadyOverlap;
     const isLastOverlapping = !isOverlaping && this.isAlreadyOverlap;

@@ -1,25 +1,15 @@
 import Character from "../objects/character";
+import Item from "../objects/item";
 import Player from "../objects/player";
 
-let alreadyOverlap: boolean = false;
 
-export default function handlerOverlap(player: Player, character: Character, spacing: number, {
-    startCallback,
-    endCallback
-}: { startCallback: Function, endCallback: Function }) {
-    const isOverlaping: boolean =
-        (
-            (player.sprite.x + spacing >= character.sprite.x) &&
-            (player.sprite.x <= character.sprite.x + spacing)
-        );
-
-    if (!alreadyOverlap && isOverlaping) {
-        alreadyOverlap = true;
-        return startCallback();
+export default function isOverlapping(player: Player, object: Character | Item, spacing: number) {
+    if (!player.isTouching.ground) {
+        return false;
     }
 
-    if (alreadyOverlap && !isOverlaping) {
-        alreadyOverlap = false;
-        return endCallback();
-    }
+    return (
+        (player.sprite.x + spacing >= object.sprite.x) &&
+        (player.sprite.x <= object.sprite.x + spacing)
+    );
 }

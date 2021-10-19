@@ -1,5 +1,6 @@
 import { OBJECTS_LAYER_NAME } from "../constants/tilemap";
 import { IItemConstructor } from "../interfaces/items.interface";
+import isOverlapping from "../utils/overlap";
 import Item from "./item";
 import Player from "./player";
 
@@ -31,7 +32,7 @@ export default class Interruptor extends Item {
     }
 
     handleOverlapWith(player: Player) {
-        const isOverlaping = this.scene.matter.overlap(this.sprite, [player.sprite]);
+        const isOverlaping = isOverlapping(player, this, 100);
 
         if (isOverlaping && !this.isAlreadyOverlap) {
             this.isAlreadyOverlap = true;

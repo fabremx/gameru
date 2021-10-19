@@ -13,7 +13,7 @@ export default class Player {
 
     // Bodies
     private sensors: ISensors;
-    private isTouching = { left: false, right: false, ground: false };
+    isTouching = { left: false, right: false, ground: false };
 
     // Keys
     private leftInput: MultiKey;
